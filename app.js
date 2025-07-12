@@ -2,6 +2,9 @@ const express = require('express')
 const dotenv = require('dotenv')
 const connectDB = require('./config/database')
 const userRoutes = require('./routes/user.routes')
+const storeOwnerRoutes = require('./routes/medicalStoreOwner.routes')
+const medicineRoutes = require('./routes/medicine.routes')
+const shopRoutes = require('./routes/shop.routes')
 const cors = require('cors')
 
 dotenv.config()
@@ -19,8 +22,20 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Routes
 app.use('/api/users', userRoutes)
+app.use('/api/store-owners', storeOwnerRoutes)
+app.use('/api/medicines', medicineRoutes)
+app.use('/api/shop', shopRoutes)
 
-app.get('/', (req, res) => res.send('Arogya Loop Server is running!'))
+app.get('/', (req, res) => res.json({ 
+    message: 'Arogya Loop Server is running!',
+    version: '1.0.0',
+    endpoints: {
+        users: '/api/users',
+        storeOwners: '/api/store-owners',
+        medicines: '/api/medicines',
+        shop: '/api/shop'
+    }
+}))
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -32,7 +47,13 @@ app.use((err, req, res, next) => {
     })
 })
 
-
+// Handle 404 routes
+app.all('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: `Route ${req.originalUrl} not found`
+    })
+})
 
 app.listen(port, () => console.log(`Server running on port ${port}!`))
 
